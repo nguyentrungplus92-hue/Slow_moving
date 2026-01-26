@@ -1,0 +1,795 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Báo Cáo Hàng Tồn Kho Chậm - FG và HALB</title>
+    <link rel="shortcut icon" href="{% static 'img/favicon.png' %}" >
+    <link href="{% static 'css/bootstrap.min.css' %}"  rel="stylesheet">
+    <link href="{% static 'css/select2.min.css' %}"  rel="stylesheet" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding: 40px 20px;
+        }
+
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .form-row-custom {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+            align-items: flex-start;
+        }
+
+        .form-row-custom:last-of-type {
+            margin-bottom: 0;
+        }
+
+        .form-label-custom {
+            display: block;
+            font-weight: 600;
+            color: #0083b0;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            min-width: 150px;
+            padding-top: 12px;
+        }
+
+        .form-input-wrapper {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .form-control, .form-select, textarea {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px 15px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #f0f9ff;
+            font-weight: 500;
+            width: 100%;
+        }
+
+        .form-control:focus, .form-select:focus, textarea:focus {
+            border-color: #00b4db;
+            background-color: #fff;
+            box-shadow: 0 0 0 4px rgba(0, 180, 219, 0.1);
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 70px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .select2-container--default .select2-selection--multiple {
+            border: 2px solid #e0e0e0 !important;
+            border-radius: 8px !important;
+            background-color: #f0f9ff !important;
+            transition: all 0.3s ease;
+            min-height: 45px;
+        }
+
+        .select2-container--default .select2-selection--multiple.highlight-yellow {
+            background-color: #fff4e6 !important;
+        }
+
+        .select2-container--default.select2-container--focus .select2-selection--multiple {
+            border-color: #00b4db !important;
+            box-shadow: 0 0 0 4px rgba(0, 180, 219, 0.1) !important;
+        }
+
+        .select2-dropdown {
+            border-radius: 8px !important;
+            border: 2px solid #00b4db !important;
+        }
+
+        #selectedPlants {
+            color: #0083b0;
+            font-weight: 600;
+            margin-top: 8px;
+            padding: 10px 12px;
+            background-color: #f0f9ff;
+            border-radius: 6px;
+            min-height: 20px;
+            font-size: 0.95rem;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 6px;
+            display: none;
+            animation: shake 0.4s;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .is-invalid {
+            border-color: #dc3545 !important;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 25px;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+
+        .form-check {
+            display: flex;
+            align-items: center;
+            margin: 0;
+        }
+
+        .form-check-input {
+            width: 20px;
+            height: 20px;
+            margin-right: 8px;
+            cursor: pointer;
+            accent-color: #00b4db;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+        }
+
+        .form-check-input:checked {
+            background-color: #00b4db;
+            border-color: #00b4db;
+        }
+
+        .form-check-label {
+            cursor: pointer;
+            margin: 0;
+            font-weight: 500;
+            color: #333;
+            user-select: none;
+        }
+
+        .storage-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 5px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .radio-item input[type="text"] {
+            margin-left: 8px;
+            flex: 1;
+            border: 2px solid #e0e0e0;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            background-color: #f0f9ff;
+        }
+
+        .radio-item input[type="text"]:focus {
+            border-color: #00b4db;
+            outline: none;
+        }
+
+        .radio-item input[type="text"]:disabled {
+            background-color: #e0e0e0;
+            color: #999;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+            justify-content: center;
+        }
+
+        .btn-custom {
+            padding: 14px 35px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(0, 180, 219, 0.3);
+            min-width: 180px;
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 35px rgba(0, 180, 219, 0.4);
+        }
+
+        .btn-submit:active:not(:disabled) {
+            transform: translateY(-1px);
+        }
+
+        .btn-reset {
+            background-color: #f0f0f0;
+            color: #333;
+            border: 2px solid #e0e0e0;
+            min-width: 180px;
+        }
+
+        .btn-reset:hover:not(:disabled) {
+            background-color: #e0e0e0;
+            border-color: #999;
+        }
+
+        .btn-custom:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(4px);
+        }
+
+        .loading-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .spinner-border {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #f0f0f0;
+            border-top-color: #00b4db;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #00b4db 0%, #0083b0 100%);
+            color: white;
+            border-radius: 15px 15px 0 0;
+            border: none;
+        }
+
+        .modal-body {
+            padding: 25px;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .modal-footer {
+            border-top: 1px solid #e0e0e0;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+            }
+
+            .form-card {
+                padding: 25px;
+                border-radius: 12px;
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .form-row-custom {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .form-label-custom {
+                min-width: auto;
+                padding-top: 0;
+                margin-bottom: 8px;
+            }
+
+            .checkbox-group {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn-custom {
+                width: 100%;
+                min-width: unset;
+            }
+        }
+    </style>
+    <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'js/jquery-3.6.0.min.js' %}"></script>
+    <script src="{% static 'js/select2.min.js' %}"></script>
+</head>
+<body>
+
+<div class="main-container">
+    <div class="header">
+        <h1>📊 Báo Cáo Hàng Tồn Kho Chậm<br/> FG và HALB</h1>
+        <p>Quản lý và phân tích dữ liệu SAP - Slow moving report</p>
+    </div>
+
+    <div class="form-card">
+        <form id="reportForm" method="post">
+            {% csrf_token %}
+            <!-- Ngày -->
+            <div class="form-row-custom">
+                <label class="form-label-custom">📅 Ngày</label>
+                <div class="form-input-wrapper">
+                    <input type="date" class="form-control" name="date" id="dateInput">
+                    <div id="dateError" class="error-message"></div>
+                </div>
+            </div>
+
+            <!-- Mã hàng (FG / HALB) -->
+            <div class="form-row-custom">
+                <label class="form-label-custom">📦 Mã hàng</label>
+                <div class="form-input-wrapper">
+                    <textarea class="form-control" name="material" id="material" placeholder="Nhập mã FG / HALB (ngăn cách bằng dòng mới)"></textarea>
+                </div>
+            </div>
+
+            <!-- Nhà máy -->
+            <div class="form-row-custom" style="align-items: flex-start;">
+                <label class="form-label-custom">🏭 Nhà máy</label>
+                <div class="form-input-wrapper" style="flex: 1;">
+                    <select class="form-select highlight-yellow" name="plant" id="plantSelect" multiple="multiple" style="width: 100%;">
+                        <option value="V501">V501</option>
+                        <option value="VB01">VB01</option>
+                        <option value="VC01">VC01</option>
+                        <option value="VE01">VE01</option>
+                        <option value="VG01">VG01</option>
+                        <option value="VR01">VR01</option>
+                        <option value="VV01">VV01</option>
+                        <option value="VI01">VI01</option>
+                        <option value="VY01">VY01</option>
+                    </select>
+                    <div id="selectedPlants"></div>
+                    <div id="plantError" class="error-message"></div>
+                </div>
+            </div>
+
+            <!-- Lưu trữ -->
+            <div class="form-row-custom">
+                <label class="form-label-custom">💾 Lưu trữ</label>
+                <div class="form-input-wrapper">
+                    <div class="storage-group">
+                        <div class="radio-item">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="down_Radio" id="downClient" value="downClient" checked>
+                                <label class="form-check-label" for="downClient">Máy tính (Client)</label>
+                            </div>
+                        </div>
+                        <div class="radio-item">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="down_Radio" id="downServer" value="downServer">
+                                <label class="form-check-label" for="downServer">Máy chủ (Server)</label>
+                            </div>
+                            <input type="text" id="serverPath" name="serverPath" value="O:/SAP/Project/TRUNG/" disabled>
+                            <div id="serverPathError" class="error-message"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Nút bấm -->
+            <div class="button-group">
+                <button type="submit" class="btn-custom btn-submit" id="submitButton">
+                    ✓ Gửi
+                </button>
+                <button type="reset" class="btn-custom btn-reset" id="resetButton">
+                    ↻ Đặt lại
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Loading Overlay -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-content">
+        <div class="spinner-border" role="status"></div>
+        <p class="mt-3 mb-0" style="font-weight: 600; color: #333;">Đang xử lý yêu cầu...</p>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="responseModal" tabindex="-1" aria-labelledby="responseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="responseModalLabel">Thông báo</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Đóng"></button>
+            </div>
+            <div class="modal-body" id="responseMessage"></div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="confirmButton">OK</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Khởi tạo Select2
+        $('#plantSelect').select2({
+            placeholder: "Chọn nhà máy",
+            allowClear: true
+        });
+
+        // Thêm class highlight-yellow cho select2 container
+        $('#plantSelect').next('.select2-container').addClass('highlight-yellow');
+
+        let formState = {};
+
+        // Cập nhật danh sách nhà máy đã chọn
+        function updateSelectedPlants() {
+            var selectedValues = $('#plantSelect').val();
+            var selectedTexts = [];
+            if (selectedValues && selectedValues.length > 0) {
+                $('#plantSelect option').each(function() {
+                    if (selectedValues.includes($(this).val())) {
+                        selectedTexts.push($(this).text());
+                    }
+                });
+                $('#selectedPlants').html(selectedTexts.join(', '));
+            } else {
+                $('#selectedPlants').html('');
+            }
+        }
+
+        // Khôi phục trạng thái form
+        function restoreFormState() {
+            $('#dateInput').val(formState.date || '');
+            $('#material').val(formState.material || '');
+            $('#plantSelect').val(formState.plant || []).trigger('change');
+            $('#serverPath').val(formState.serverPath || 'O:/SAP/Project/TRUNG/');
+            updateSelectedPlants();
+            $('#reportForm').find('input, textarea, select, button').prop('disabled', false);
+            $('#loadingOverlay').hide();
+        }
+
+        // Toggle serverPath enable/disable theo radio
+        $('input[name="down_Radio"]').on('change', function () {
+            const mode = $('input[name="down_Radio"]:checked').val();
+            if (mode === 'downServer') {
+                $('#serverPath').prop('disabled', false);
+            } else {
+                $('#serverPath').prop('disabled', true);
+                $('#serverPathError').removeClass('show').text('');
+            }
+        }).trigger('change');
+
+        // Xử lý sự kiện thay đổi lựa chọn nhà máy
+        $('#plantSelect').on('change', function() {
+            updateSelectedPlants();
+            $('#plantError').removeClass('show');
+            $('#plantSelect').next('.select2').find('.select2-selection').css('border', '');
+        });
+
+        // Xử lý sự kiện reset form
+        $('#reportForm').on('reset', function() {
+            $('#plantSelect').val(null).trigger('change');
+            updateSelectedPlants();
+            $('.error-message').removeClass('show').text('');
+            $('.is-invalid').removeClass('is-invalid');
+            $('#reportForm').find('input, textarea, select, button').prop('disabled', false);
+            $('#loadingOverlay').hide();
+            formState = {};
+        });
+
+        // Hiển thị modal thông báo
+        function showModal(message, isSuccess) {
+            $('#responseMessage').html(message);
+            $('#responseModalLabel').text(isSuccess ? 'Thành công' : 'Lỗi');
+            $('#responseModal').modal('show');
+        }
+
+        // Xử lý sự kiện nhấn OK trong modal
+        $('#confirmButton').on('click', function() {
+            $('#responseModal').modal('hide');
+            restoreFormState();
+        });
+
+        // Lấy CSRF token từ cookie (Django tự set cookie khi load trang)
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+        const csrftoken = getCookie('csrftoken');
+
+        // Cấu hình jQuery để tự động thêm CSRF token vào header khi POST
+        $.ajaxSetup({
+            headers: { 'X-CSRFToken': csrftoken }
+        });
+
+        // Xử lý submit
+        $('#reportForm').on('submit', function(e) {
+            e.preventDefault();
+
+            $('.error-message').removeClass('show').text('');
+            $('.is-invalid').removeClass('is-invalid');
+
+            let isValid = true;
+
+            const dateValue = $('#dateInput').val();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (!dateValue) {
+                $('#dateError').text('Vui lòng chọn ngày').addClass('show');
+                $('#dateInput').addClass('is-invalid');
+                isValid = false;
+            } else {
+                const selectedDate = new Date(dateValue);
+                selectedDate.setHours(0, 0, 0, 0);
+
+                const today2 = new Date();
+                today2.setHours(0, 0, 0, 0);
+
+                // Giới hạn tối đa trong tháng (hiện tại đang set = hôm nay)
+                const maxDate = new Date(today2);
+                maxDate.setMonth(maxDate.getMonth() + 0);
+
+                if (selectedDate < today2) {
+                    $('#dateError').text('Ngày phải là hôm nay hoặc sau đó').addClass('show');
+                    $('#dateInput').addClass('is-invalid');
+                    isValid = false;
+                }
+                else if (selectedDate > maxDate) {
+                    $('#dateError').text('Ngày phải trong tháng hiện tại').addClass('show');
+                    $('#dateInput').addClass('is-invalid');
+                    isValid = false;
+                }
+            }
+
+            const downMode = $('input[name="down_Radio"]:checked').val();
+            const serverPathVal = $('#serverPath').val();
+            if (downMode === 'downServer') {
+                if (!serverPathVal || !serverPathVal.trim()) {
+                    $('#serverPathError').text('Vui lòng nhập đường dẫn lưu trên server').addClass('show');
+                    isValid = false;
+                } else {
+                    $('#serverPathError').removeClass('show').text('');
+                }
+            }
+
+            if (!isValid) return;
+
+            formState = {
+                date: $('#dateInput').val(),
+                material: $('#material').val(),
+                plant: $('#plantSelect').val() || [],
+                down_Radio: downMode,
+                serverPath: serverPathVal
+            };
+
+            $('#reportForm').find('input, textarea, select, button').prop('disabled', true);
+            $('#loadingOverlay').show();
+
+            var formData = new FormData();
+            formData.append('date', formState.date);
+            formData.append('material', formState.material);
+            formState.plant.forEach(function(plant) {
+                formData.append('plant', plant);
+            });
+            formData.append('down_Radio', formState.down_Radio);
+            formData.append('serverPath', formState.serverPath);
+
+            const submitUrl = "{% url 'slow_moving:FG_post' %}";
+
+            const ajaxOptions = {
+                url: submitUrl,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false
+                // CHỈ add xhrFields khi downClient
+            };
+
+            if (downMode === 'downClient') {
+                ajaxOptions['xhrFields'] = { responseType: 'blob' };
+            }
+
+            $.ajax({
+                ...ajaxOptions,
+                success: async function(data, status, xhr) {
+                    $('#loadingOverlay').hide();
+
+                    const contentType = (xhr.getResponseHeader('content-type') || '').toLowerCase();
+
+                    // ===== TẢI VỀ CLIENT =====
+                    if (downMode === 'downClient') {
+                        if (contentType.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) {
+                            const blob = new Blob([data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = url;
+
+                            const cd = xhr.getResponseHeader('content-disposition');
+                            let filename = 'Slow_moving.xlsx';
+                            if (cd) {
+                                const m = cd.match(/filename="?([^"]+)"?/);
+                                if (m && m[1]) {
+                                    filename = m[1];
+                                    if (!filename.toLowerCase().endsWith('.xlsx')) filename += '.xlsx';
+                                }
+                            }
+                            a.download = filename;
+                            document.body.appendChild(a);
+                            a.click();
+                            document.body.removeChild(a);
+                            window.URL.revokeObjectURL(url);
+
+                            showModal('File Excel đã được tải về thành công!', true);
+                            return;
+                        }
+
+                        // Nếu lỡ trả JSON trong chế độ blob
+                        try {
+                            const text = await data.text();
+                            const json = JSON.parse(text);
+                            const msg = json.detail || 'Nhận được phản hồi JSON từ server.';
+                            showModal(msg, true);
+                        } catch (e) {
+                            showModal('Đã xảy ra lỗi không xác định khi xử lý phản hồi.', false);
+                        }
+                        return;
+                    }
+
+                    // ===== LƯU TRÊN SERVER ===== (JsonResponse)
+                    if (contentType.includes('application/json')) {
+                        // jQuery tự parse -> data là object JSON
+                        const msg = data.detail || 'Lưu file thành công trên server.';
+                        const fp = data.filepath ? `<br><code>${data.filepath}</code>` : '';
+                        showModal(`${msg}${fp}`, true);
+                    } else if (data instanceof Blob) {
+                        // fallback nếu phía server trả blob JSON
+                        try {
+                            const text = await data.text();
+                            const json = JSON.parse(text);
+                            const msg = json.detail || 'Lưu file thành công trên server.';
+                            const fp = json.filepath ? `<br><code>${json.filepath}</code>` : '';
+                            showModal(`${msg}${fp}`, true);
+                        } catch (e) {
+                            showModal('Lưu server: không đọc được phản hồi JSON.', false);
+                        }
+                    } else {
+                        showModal('Lưu server: phản hồi không xác định.', false);
+                    }
+                },
+                error: function(xhr) {
+                    $('#loadingOverlay').hide();
+                    $('#reportForm').find('input, textarea, select, button').prop('disabled', false);
+
+                    var errorMessage = 'Đã xảy ra lỗi khi gửi dữ liệu.';
+
+                    if (xhr.responseType === 'blob' && xhr.response instanceof Blob) {
+                        const reader = new FileReader();
+                        reader.onload = function() {
+                            try {
+                                const errorResponse = JSON.parse(reader.result);
+                                if (errorResponse.detail) {
+                                    errorMessage = errorResponse.detail;
+                                }
+                            } catch (e) {}
+                            showModal(errorMessage, false);
+                        };
+                        reader.readAsText(xhr.response);
+                    } else {
+                        if (xhr.responseJSON) {
+                            if (xhr.responseJSON.detail) {
+                                errorMessage = xhr.responseJSON.detail;
+                            } else if (xhr.responseJSON['Could not connect to server.']) {
+                                errorMessage = 'Không thể kết nối với server.';
+                            } else if (xhr.responseJSON['Could not log in. Wrong credentials?']) {
+                                errorMessage = 'Không thể đăng nhập. Thông tin đăng nhập sai?';
+                            } else if (xhr.responseJSON['An SAP error occurred:']) {
+                                errorMessage = 'Lỗi SAP: ' + xhr.responseJSON['An SAP error occurred:'];
+                            } else if (xhr.responseJSON['Unexpected error:']) {
+                                errorMessage = 'Lỗi không xác định: ' + xhr.responseJSON['Unexpected error:'];
+                            }
+                        }
+                        showModal(errorMessage, false);
+                    }
+                }
+            });
+        });
+
+        updateSelectedPlants();
+    });
+</script>
+</body>
+</html>
