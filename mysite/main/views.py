@@ -115,8 +115,8 @@ async def home_post(request):
 
         #-------------Get điều kiện cho bảng ZTMA_MRP1-------------------------#
         ZTMA_MRP1_conditions = builder.merge_multiple_where_conditions(
-            [list_material, list_vendor, PLSCN, inventory]
-            # [list_material, list_vendor]
+            # [list_material, list_vendor, PLSCN, inventory]
+            [list_material, list_vendor]
         )
 
 
@@ -205,7 +205,7 @@ async def home_post(request):
         else:                                                   # Đang làm việc với HANA sử dụng RFC để lấy dữ liệu các bảng, còn 2 bảng MARA và LFA1 sẽ dùng Odata
 
             # Lấy dữ liệu của bảng MARA
-            all_products = fetch_sap_odata_all(
+            all_MARA = fetch_sap_odata_all(
                     base_url="http://hana.cmcconsulting.vn:8012",
                     odata_root="/sap/opu/odata/sap/",
                     service_name="API_PRODUCT_SRV",
@@ -218,11 +218,11 @@ async def home_post(request):
                     username=constants.USER,
                     password=constants.PASSWD
             )
-            print(len(all_products))
+            print(f"Đã đọc xong bảng MARA: {len(all_MARA)} bản ghi")
 
 
-            # Lấy dữ liệu của bảng MARA
-            all_products2 = fetch_sap_odata_all(
+            # Lấy dữ liệu của bảng LFA1
+            all_LFA1 = fetch_sap_odata_all(
                     base_url="http://hana.cmcconsulting.vn:8012",
                     odata_root="/sap/opu/odata/sap/",
                     service_name="API_BUSINESS_PARTNER",
@@ -235,7 +235,7 @@ async def home_post(request):
                     username=constants.USER,
                     password=constants.PASSWD
             )
-            print(all_products2)
+            print(f"Đã đọc xong bảng LFA1: {len(all_LFA1)} bản ghi")
 
 
 
@@ -365,11 +365,18 @@ async def home_post(request):
         result_detail = []             # chi tiết
         result_summary = []            # tóm tắt
 
-        # Convert data_lfa1 thành dict để tra cứu nhanh-> Chú ý: Dữ liệu không được bị trùng
-        lfa1_dict = {item['LIFNR']: item['NAME1'] for item in results[6]}
 
-        # Convert data_Mara thành dict để tra cứu nhanh-> Chú ý: Dữ liệu không được bị trùng
-        mara_dict = {item['MATNR']: item['EXTWG'] for item in results[5]}
+        if constants.Check_HANA  == '':
+            # Convert data_lfa1 thành dict để tra cứu nhanh-> Chú ý: Dữ liệu không được bị trùng
+            lfa1_dict = {item['LIFNR']: item['NAME1'] for item in results[6]}
+            # Convert data_Mara thành dict để tra cứu nhanh-> Chú ý: Dữ liệu không được bị trùng
+            mara_dict = {item['MATNR']: item['EXTWG'] for item in results[5]}
+        else:
+            # Convert data_lfa1 thành dict để tra cứu nhanh-> Chú ý: Dữ liệu không được bị trùng
+            lfa1_dict = {item['LIFNR']: item['NAME1'] for item in all_LFA1} 
+            # Convert data_Mara thành dict để tra cứu nhanh-> Chú ý: Dữ liệu không được bị trùng
+            mara_dict = {item['MATNR']: item['EXTWG'] for item in all_MARA}
+
 
         # Convert data_Marc -> dict, key là tuple (MATNR, WERKS)-> Chú ý: Dữ liệu không được bị trùng
         marc_dict = {(item['MATNR'], item['WERKS']): item for item in results[1]}
