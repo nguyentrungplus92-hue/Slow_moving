@@ -44,6 +44,10 @@ def read_sap_data(reader_instance, table_name, fields, conditions):
 
 # === HÀM ASYNC - Wrapper cho read_sap_data ===
 async def fetch_sap_table_async(reader_instance, table_name, fields, conditions, sem):
+    print(reader_instance)
+    print(table_name)
+    print(fields)
+    print(conditions)
     async with sem:
         return await asyncio.to_thread(
             read_sap_data, reader_instance, table_name, fields, conditions
@@ -234,6 +238,7 @@ async def home_post(request):
                     fmt="json",
                     username=constants.USER,
                     password=constants.PASSWD
+
             )
             print(f"Đã đọc xong bảng LFA1: {len(all_LFA1)} bản ghi")
 
@@ -475,6 +480,7 @@ async def home_post(request):
         # print(mvt_101_dict)
         # for item in data_ZTMA_MRP1:
         # for item in [x for x in data_ZTMA_MRP1 if x["WERKS"] in plant]:
+
         for item in (data_ZTMA_MRP1 if not plant else [x for x in data_ZTMA_MRP1 if x["WERKS"] in plant]):
             
             # Tính Type 2 -> Cột C
