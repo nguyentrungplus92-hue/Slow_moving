@@ -44,10 +44,6 @@ def read_sap_data(reader_instance, table_name, fields, conditions):
 
 # === HÀM ASYNC - Wrapper cho read_sap_data ===
 async def fetch_sap_table_async(reader_instance, table_name, fields, conditions, sem):
-    print(reader_instance)
-    print(table_name)
-    print(fields)
-    print(conditions)
     async with sem:
         return await asyncio.to_thread(
             read_sap_data, reader_instance, table_name, fields, conditions
@@ -119,8 +115,8 @@ async def home_post(request):
 
         #-------------Get điều kiện cho bảng ZTMA_MRP1-------------------------#
         ZTMA_MRP1_conditions = builder.merge_multiple_where_conditions(
-            # [list_material, list_vendor, PLSCN, inventory]
-            [list_material, list_vendor]
+            [list_material, list_vendor, PLSCN, inventory]
+            # [list_material, list_vendor]
         )
 
 

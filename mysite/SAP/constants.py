@@ -1,4 +1,4 @@
-Check_HANA = 'X'                 # Đánh dấu kiểm tra xem đã dùng HANA chưa? Để '' là đang dùng ECC
+Check_HANA = ''                 # Đánh dấu kiểm tra xem đã dùng HANA chưa? Để '' là đang dùng ECC
 
 
 if Check_HANA == '':                
