@@ -630,8 +630,8 @@ async def home_post(request):
                     continue
 
                 if start_date <= budat <= end_date and r['BWART'] in ['261', '262']:
-                    total_261_n_1 -= valid.cal_total(r['BWART'],r['MENGE'])
-                    total_261_n_1_6 -= valid.cal_total(r['BWART'],r['MENGE'])
+                    total_261_n_1 += valid.cal_total(r['BWART'],r['MENGE'])
+                    total_261_n_1_6 += valid.cal_total(r['BWART'],r['MENGE'])
                     continue
 
 
@@ -723,7 +723,7 @@ async def home_post(request):
                 # Tháng n-1 đến n-6
                 start_date, end_date =  valid.start_end_date(conv_date, 1, 6)
                 if  start_date <= thang_datetime <= end_date :
-                    total_261_n_1_6 -= float(r['chenhlech'])
+                    total_261_n_1_6 += float(r['chenhlech'])
                     continue
 
 
