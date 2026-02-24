@@ -1167,7 +1167,7 @@ async def FG_post(request):
             sale_n_1 = 0.00
             sale_total = 0.00
 
-            # Tính sale các tháng n-2 đến n-6 đã lấy trong PostgreSQL
+            # Tính sale các tháng n-2 đến n-6 đã lấy trong PostgreSQL-> Chú ý: Vì dữ hàng xuất lên cần đổi cộng dồn thành -
             for r in mvt_n_2_6_dict[key]:
                 thang_datetime = datetime.combine(r['thang'], datetime.min.time())  # ✅ chuyển sang datetime
 
@@ -1175,31 +1175,31 @@ async def FG_post(request):
                 start_date, end_date =  valid.start_end_date(conv_date, 6, 6)
 
                 if  start_date <= thang_datetime <= end_date :
-                    sale_n_6 += float(r['chenhlech'])
+                    sale_n_6 -= float(r['chenhlech'])
                     continue
                 
                 #Tháng n-5
                 start_date, end_date =  valid.start_end_date(conv_date, 5, 5)
                 if  start_date <= thang_datetime <= end_date :
-                    sale_n_5 += float(r['chenhlech'])
+                    sale_n_5 -= float(r['chenhlech'])
                         
                         
                 #Tháng n-4
                 start_date, end_date =  valid.start_end_date(conv_date, 4, 4)
                 if  start_date <= thang_datetime <= end_date :
-                    sale_n_4 += float(r['chenhlech'])
+                    sale_n_4 -= float(r['chenhlech'])
                     continue
 
                 #Tháng n-3
                 start_date, end_date =  valid.start_end_date(conv_date, 3, 3)
                 if  start_date <= thang_datetime <= end_date :
-                    sale_n_3 += float(r['chenhlech'])
+                    sale_n_3 -= float(r['chenhlech'])
                     continue
 
                 #Tháng n-2
                 start_date, end_date =  valid.start_end_date(conv_date, 2, 2)
                 if  start_date <= thang_datetime <= end_date :
-                    sale_n_2 += float(r['chenhlech'])
+                    sale_n_2 -= float(r['chenhlech'])
                     continue
 
 
@@ -1211,7 +1211,7 @@ async def FG_post(request):
                 start_date, end_date =  valid.start_end_date(conv_date, 1, 1)
 
                 if start_date <= budat <= end_date:
-                    sale_n_1 += valid.cal_total(r['BWART'],r['MENGE'])
+                    sale_n_1 -= valid.cal_total(r['BWART'],r['MENGE'])
                     continue
 
 
